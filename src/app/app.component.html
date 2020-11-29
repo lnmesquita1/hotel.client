@@ -1,0 +1,164 @@
+<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+<!-- <toaster-container [toasterconfig]="toasterconfig"></toaster-container> -->
+<div id="wrapper" class="animate">
+  <nav class="navbar header-top fixed-top navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">LOGO</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+      aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav animate side-nav">
+
+        <li class="nav-item">
+          <a class="nav-link" href="#" title="Cart"> <i class="fas fa-cart-plus"></i><span class="ttip">Add
+              Cart</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" title="Comment"> <i class="fas fa-comment"></i><span class="ttip">Chat</span></a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-md-auto d-md-flex">
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="fas fa-key"></i> Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <button type="button" class="btn btn-primary btn-sm" (click)="hospedeModal.show()" style="margin-bottom: 10px;">
+          Incluir pessoa
+        </button>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Novo check in</h5>
+            <form [formGroup]="formCheckin">
+              <div class="row">
+                <div class="col-lg-3">
+                  <div class="mda-form-group append ng-select-group">
+                    <ng-select formControlName="hospede" [formControl]="formCheckin.controls['hospede']" appendTo="body"
+                      [selectOnTab]="true" [items]="listGuestsSelect" class="form-control form-control-sm"
+                      placeholder="{{ formCheckin.controls['hospede'].value ? '' : 'Pessoa'}}" bindLabel="hospede.nome"
+                      bindValue="hospede">
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <div class="mda-form-group">
+                    <input placeholder="Data de entrada" formControlName="dataEntrada"
+                      [formControl]="formCheckin.controls['dataEntrada']" type="text"
+                      [bsConfig]="{ rangeInputFormat : 'DD/MM/YY, HH:MM:SS', dateInputFormat: 'DD/MM/YY, HH:MM:SS' }"
+                      class="form-control form-control-sm" #datepickerFull="bsDatepicker" bsDatepicker>
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <div class="mda-form-group">
+                    <input placeholder="Data de saída" formControlName="dataSaida"
+                      [formControl]="formCheckin.controls['dataSaida']" type="text"
+                      [bsConfig]="{ rangeInputFormat : 'DD/MM/YY, HH:mm:SS', dateInputFormat: 'DD/MM/YY, HH:MM:SS' }"
+                      class="form-control form-control-sm" #datepickerFull="bsDatepicker" bsDatepicker>
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" formControlName="adicionalVeiculo"
+                      [formControl]="formCheckin.controls['adicionalVeiculo']" id="customCheck1">
+                    <label class="custom-control-label" for="customCheck1">Possui veículo</label>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-success btn-sm" style="margin-top: 10px;" (click)="submitCheckIn()">
+                Salvar
+              </button>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top: 15px;">
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Consultas</h5>
+            <div style="margin-bottom: 10px;">
+              <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" value="all" id="all" name="all" [(ngModel)]="searchType"
+                  class="custom-control-input" (change)="changeSearchType()">
+                <label class="custom-control-label" for="all">Todas</label>
+              </div>
+              <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" value="hostedGuests" id="hostedGuests" name="hostedGuests" [(ngModel)]="searchType"
+                  class="custom-control-input" (change)="changeSearchType()">
+                <label class="custom-control-label" for="hostedGuests">Pessoas ainda presentes</label>
+              </div>
+              <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" value="leftGuests" id="leftGuests" name="leftGuests" [(ngModel)]="searchType"
+                  class="custom-control-input" (change)="changeSearchType()">
+                <label class="custom-control-label" for="leftGuests">Pessoas que já deixaram o hotel</label>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Id</th>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Documento</th>
+                  <th scope="col">Valor gasto (R$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let guest of listGuests; let i = index">
+                  <th scope="row">{{ guest.hospede.id }}</th>
+                  <td>{{ guest.hospede.nome }}</td>
+                  <td>{{ guest.hospede.documento }}</td>
+                  <td>{{ guest.total }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" bsModal #hospedeModal="bs-modal" tabindex="-1" role="dialog" aria-labelledby="labelModal"
+    aria-hidden="true">
+    <form class="form-validate" novalidate="" [formGroup]="formHospede">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="labelModal">Novo hóspede</h5>
+            <button type="button" class="close" (click)="hospedeModal.hide()" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-lg-4">
+                <input type="text" formControlName="nome" [formControl]="formHospede.controls['nome']" 
+                class="form-control form-control-sm" placeholder="Nome">
+              </div>
+              <div class="col-lg-4">
+                <input type="text" formControlName="documento" [formControl]="formHospede.controls['documento']" 
+                class="form-control form-control-sm" placeholder="Documento">
+              </div>
+              <div class="col-lg-4">
+                <input type="text" formControlName="telefone" [formControl]="formHospede.controls['telefone']" 
+                class="form-control form-control-sm" placeholder="Telefone">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="hospedeModal.hide()" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary btn-sm" (click)="submitHospede(hospedeModal)">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
