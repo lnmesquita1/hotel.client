@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { defineLocale } from 'ngx-bootstrap/chronos';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { ptBrLocale } from 'ngx-bootstrap/locale';
-defineLocale('pt-br', ptBrLocale);
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -15,7 +14,7 @@ import { HotelService } from './hotel.service';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ToasterModule, ToasterService } from 'angular2-toaster/angular2-toaster';
+defineLocale('pt-br', ptBrLocale);
 
 @NgModule({
   declarations: [
@@ -32,11 +31,9 @@ import { ToasterModule, ToasterService } from 'angular2-toaster/angular2-toaster
     ReactiveFormsModule,
     CommonModule,
     NgSelectModule,
-    ToasterModule
   ],
   providers: [
     HotelService,
-    ToasterService
   ],
   bootstrap: [AppComponent]
 })

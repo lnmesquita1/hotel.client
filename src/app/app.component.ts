@@ -1,27 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { HotelService } from './hotel.service';
 import { CheckIn } from './models/checkin.model';
 import { Hospede } from './models/hospede.model';
-import {
-  ToasterService,
-  ToasterConfig,
-} from 'angular2-toaster/angular2-toaster';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit{
-
-  public toasterconfig: ToasterConfig = new ToasterConfig({
-    positionClass: 'toast-bottom-center',
-    showCloseButton: true,
-    limit: 1
-  });
-
+export class AppComponent implements OnInit {
   public formCheckin: FormGroup;
 
   public formHospede: FormGroup;
@@ -32,93 +21,131 @@ export class AppComponent implements OnInit{
 
   public searchType: string = 'all';
 
+  public successMessage: string = null;
+
+  public errorMessage: string = null;
+
   constructor(
     private localeService: BsLocaleService,
     private fb: FormBuilder,
-    private service: HotelService,
-    private toasterService: ToasterService,
-    ) { }
+    private service: HotelService
+  ) {}
 
   ngOnInit() {
     this.localeService.use('pt-br');
     this.formCheckin = this.fb.group(new CheckIn());
     this.formHospede = this.fb.group(new Hospede());
+    this.setValidations(this.formCheckin, this.validationsCheckIn());
+    this.setValidations(this.formHospede, this.validationsHospede());
     this.getAllGuestsSelect();
     this.getList();
   }
 
-  async submitCheckIn() {
-    await this.service
-        .createCheckIn(this.formCheckin.value)
-        .toPromise()
-        .catch((msg) => msg);
-    this.getList();
+  submitCheckIn() {
+    Object.values(this.formCheckin.controls).forEach((item) => {
+      item.markAsDirty();
+    });
+
+    if (this.formCheckin.valid) {
+      this.service.createCheckIn(this.formCheckin.value).subscribe(
+        (res: any) => {
+          if (res.data) {
+            this.showSuccessMessage('Check in realizado com sucesso!');
+            this.getList();
+            this.formCheckin.setValue(new CheckIn());
+            this.setValidations(this.formCheckin, this.validationsCheckIn());
+            this.formCheckin.markAsPristine();
+          }
+        },
+        () => {
+          this.showErrorMessage('Ocorreu um erro ao realizar o check in');
+        }
+      );
+    }
   }
 
   submitHospede(modal) {
-    this.service.createHospede(this.formHospede.value).subscribe(
+    Object.values(this.formHospede.controls).forEach((item) => {
+      item.markAsDirty();
+    });
+    if (this.formHospede.valid) {
+      this.service.createHospede(this.formHospede.value).subscribe(
+        (res: any) => {
+          if (res.data) {
+            this.showSuccessMessage('Cadastro realizado com sucesso!');
+            this.getList();
+            this.getAllGuestsSelect();
+            this.formHospede.setValue(new Hospede());
+            this.setValidations(this.formHospede, this.validationsHospede());
+            this.formHospede.markAsPristine();
+            modal.hide();
+          }
+        },
+        () => {
+          this.showErrorMessage('Ocorreu um erro ao tentar cadastrar o hóspede');
+        }
+      );
+    }
+  }
+
+  async getAllGuestsSelect() {
+    this.service.findAllGuests().subscribe(
       (res: any) => {
         if (res.data) {
-          this.getList();
-          modal.hide();
+          const list: Array<any> = res.data;
+          if (list) {
+            this.listGuestsSelect = list;
+          }
         }
       },
-      (msg) => {
-        this.toasterService.pop('error', null, msg);
+      () => {
+        this.showErrorMessage('Erro ao listar os hóspedes');
       }
     );
   }
 
-  async getAllGuestsSelect() {
-    const res = await this.service
-      .findAllGuests()
-      .toPromise()
-      .catch((msg) => msg);
-    const list: Array<any> = res['data'];
-    if (list) {
-      this.listGuestsSelect = list;
-    } else {
-      this.toasterService.pop('error', null, res);
-    }
+  getAllGuests() {
+    this.service.findAllGuests().subscribe(
+      (res: any) => {
+        if (res.data) {
+          const list: Array<any> = res.data;
+          if (list) {
+            this.listGuests = list;
+          }
+        }
+      },
+      () => {
+        this.showErrorMessage('Erro ao listar os hóspedes');
+      }
+    );
   }
 
-  async getAllGuests() {
-    const res = await this.service
-      .findAllGuests()
-      .toPromise()
-      .catch((msg) => msg);
-    const list: Array<any> = res['data'];
-    if (list) {
-      this.listGuests = list;
-    } else {
-      this.toasterService.pop('error', null, res);
-    }
+  getHostedGuests() {
+    this.service.findHostedGuests().subscribe(
+      (res: any) => {
+        if (res.data) {
+          const list: Array<any> = res.data;
+          if (list) {
+            this.listGuests = list;
+          }
+        }
+      },
+      () => {
+        this.showErrorMessage('Erro ao listar os hóspedes');
+      }
+    );
   }
 
-  async getHostedGuests() {
-    const res = await this.service
-      .findHostedGuests()
-      .toPromise()
-      .catch((msg) => msg);
-    const list: Array<any> = res['data'];
-    if (list) {
-      this.listGuests = list;
-    } else {
-      this.toasterService.pop('error', null, res);
-    }
-  }
-
-  async getLeftGuests() {
-    const res = await this.service
-      .findLeftGuests()
-      .toPromise()
-      .catch((msg) => msg);
-    const list: Array<any> = res['data'];
-    if (list) {
-      this.listGuests = list;
-    } else {
-      this.toasterService.pop('error', null, res);
-    }
+  getLeftGuests() {
+    this.service.findLeftGuests().subscribe((res: any) => {
+      const list: Array<any> = res.data;
+      if (list) {
+        this.listGuests = list;
+      }
+    },
+    () => {
+      this.showErrorMessage('Erro ao listar os hóspedes');
+    });
   }
 
   getList() {
@@ -135,5 +162,43 @@ export class AppComponent implements OnInit{
     this.getList();
   }
 
+  validationsCheckIn() {
+    const validations = {
+      hospede: Validators.required,
+      dataEntrada: Validators.required,
+      dataSaida: Validators.required,
+    };
+    return validations;
+  }
 
+  validationsHospede() {
+    const validations = {
+      nome: Validators.required,
+      documento: Validators.required,
+      telefone: Validators.required,
+    };
+    return validations;
+  }
+
+  setValidations(form: FormGroup, validations) {
+    for (const key in form.controls) {
+      const validation = validations[key] ? validations[key] : null;
+      form.controls[key].setValidators(validation);
+      form.controls[key].updateValueAndValidity();
+    }
+  }
+
+  showErrorMessage(message) {
+    this.errorMessage = message;
+      setTimeout(() => {
+        this.errorMessage = null;
+      }, 5000);
+  }
+
+  showSuccessMessage(message) {
+    this.successMessage = message;
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 5000);
+  }
 }

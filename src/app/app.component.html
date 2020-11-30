@@ -1,32 +1,7 @@
 <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-<!-- <toaster-container [toasterconfig]="toasterconfig"></toaster-container> -->
 <div id="wrapper" class="animate">
   <nav class="navbar header-top fixed-top navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">LOGO</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
-      aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarText">
-      <ul class="navbar-nav animate side-nav">
-
-        <li class="nav-item">
-          <a class="nav-link" href="#" title="Cart"> <i class="fas fa-cart-plus"></i><span class="ttip">Add
-              Cart</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" title="Comment"> <i class="fas fa-comment"></i><span class="ttip">Chat</span></a>
-        </li>
-      </ul>
-      <ul class="navbar-nav ml-md-auto d-md-flex">
-        <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-key"></i> Logout</a>
-        </li>
-      </ul>
-    </div>
+    <a class="navbar-brand" href="#">HOTEL</a>
   </nav>
   <div class="container-fluid">
     <div class="row">
@@ -34,34 +9,58 @@
         <button type="button" class="btn btn-primary btn-sm" (click)="hospedeModal.show()" style="margin-bottom: 10px;">
           Incluir pessoa
         </button>
+        <div *ngIf="successMessage" class="alert alert-success" role="alert">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+          {{ errorMessage }}
+        </div>
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Novo check in</h5>
-            <form [formGroup]="formCheckin">
+            <form [formGroup]="formCheckin"> 
               <div class="row">
                 <div class="col-lg-3">
                   <div class="mda-form-group append ng-select-group">
                     <ng-select formControlName="hospede" [formControl]="formCheckin.controls['hospede']" appendTo="body"
-                      [selectOnTab]="true" [items]="listGuestsSelect" class="form-control form-control-sm"
+                      [ngClass]="formCheckin.controls['hospede'].hasError('required') && (formCheckin.controls['hospede'].dirty) ? 
+                      'invalid-field' : !formCheckin.controls['hospede'].hasError('required') && (formCheckin.controls['hospede'].dirty) ? 
+                      'valid-field' : ''"
+                      [selectOnTab]="true" [items]="listGuestsSelect" class="mda-form-control form-control form-control-sm"
                       placeholder="{{ formCheckin.controls['hospede'].value ? '' : 'Pessoa'}}" bindLabel="hospede.nome"
                       bindValue="hospede">
                     </ng-select>
+                    <div *ngIf="formCheckin.controls['hospede'].hasError('required') && (formCheckin.controls['hospede'].dirty)" class="invalid-message">
+                      Insira um hóspede.
+                    </div>
                   </div>
                 </div>
                 <div class="col-lg-3">
                   <div class="mda-form-group">
                     <input placeholder="Data de entrada" formControlName="dataEntrada"
+                    [ngClass]="formCheckin.controls['dataEntrada'].hasError('required') && (formCheckin.controls['dataEntrada'].dirty) ? 
+                    'invalid-field' : !formCheckin.controls['dataEntrada'].hasError('required') && (formCheckin.controls['dataEntrada'].dirty) ? 
+                    'valid-field' : ''"
                       [formControl]="formCheckin.controls['dataEntrada']" type="text"
-                      [bsConfig]="{ rangeInputFormat : 'DD/MM/YY, HH:MM:SS', dateInputFormat: 'DD/MM/YY, HH:MM:SS' }"
+                      [bsConfig]="{ rangeInputFormat : 'DD/MM/YY, HH:mm:ss', dateInputFormat: 'DD/MM/YY, HH:mm:ss' }"
                       class="form-control form-control-sm" #datepickerFull="bsDatepicker" bsDatepicker>
+                      <div *ngIf="formCheckin.controls['dataEntrada'].hasError('required') && (formCheckin.controls['dataEntrada'].dirty)" class="invalid-message">
+                        Insira uma data de entrada.
+                      </div>
                   </div>
                 </div>
                 <div class="col-lg-3">
                   <div class="mda-form-group">
-                    <input placeholder="Data de saída" formControlName="dataSaida"
+                    <input placeholder="Data de saída" formControlName="dataSaida" 
+                      [ngClass]="formCheckin.controls['dataSaida'].hasError('required') && (formCheckin.controls['dataSaida'].dirty) ? 
+                      'invalid-field' : !formCheckin.controls['dataSaida'].hasError('required') && (formCheckin.controls['dataSaida'].dirty) ? 
+                      'valid-field' : ''"
                       [formControl]="formCheckin.controls['dataSaida']" type="text"
-                      [bsConfig]="{ rangeInputFormat : 'DD/MM/YY, HH:mm:SS', dateInputFormat: 'DD/MM/YY, HH:MM:SS' }"
+                      [bsConfig]="{ rangeInputFormat : 'DD/MM/YY, HH:mm:ss', dateInputFormat: 'DD/MM/YY, HH:mm:ss' }"
                       class="form-control form-control-sm" #datepickerFull="bsDatepicker" bsDatepicker>
+                      <div *ngIf="formCheckin.controls['dataSaida'].hasError('required') && (formCheckin.controls['dataSaida'].dirty)" class="invalid-message">
+                        Insira uma data de saída.
+                      </div>
                   </div>
                 </div>
                 <div class="col-lg-3">
@@ -103,13 +102,14 @@
                 <label class="custom-control-label" for="leftGuests">Pessoas que já deixaram o hotel</label>
               </div>
             </div>
-            <table class="table">
+            <table class="table table-striped table-sm">
               <thead>
                 <tr>
                   <th scope="col">Id</th>
                   <th scope="col">Nome</th>
                   <th scope="col">Documento</th>
                   <th scope="col">Valor gasto (R$)</th>
+                  <th scope="col">Última hospedagem (R$)</th>
                 </tr>
               </thead>
               <tbody>
@@ -118,6 +118,7 @@
                   <td>{{ guest.hospede.nome }}</td>
                   <td>{{ guest.hospede.documento }}</td>
                   <td>{{ guest.total }}</td>
+                  <td>{{ guest.last }}</td>
                 </tr>
               </tbody>
             </table>
@@ -141,16 +142,31 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-lg-4">
-                <input type="text" formControlName="nome" [formControl]="formHospede.controls['nome']" 
+                <input type="text" [ngClass]="formHospede.controls['nome'].hasError('required') && (formHospede.controls['nome'].dirty) ? 
+                'invalid-field' : !formHospede.controls['nome'].hasError('required') && (formHospede.controls['nome'].dirty) ? 
+                'valid-field' : ''" formControlName="nome" [formControl]="formHospede.controls['nome']" 
                 class="form-control form-control-sm" placeholder="Nome">
+                <div *ngIf="formHospede.controls['nome'].hasError('required') && (formHospede.controls['nome'].dirty)" class="invalid-message">
+                  Insira um nome.
+                </div>
               </div>
               <div class="col-lg-4">
-                <input type="text" formControlName="documento" [formControl]="formHospede.controls['documento']" 
+                <input type="text" [ngClass]="formHospede.controls['documento'].hasError('required') && (formHospede.controls['documento'].dirty) ? 
+                'invalid-field' : !formHospede.controls['documento'].hasError('required') && (formHospede.controls['documento'].dirty) ? 
+                'valid-field' : ''" formControlName="documento" [formControl]="formHospede.controls['documento']" 
                 class="form-control form-control-sm" placeholder="Documento">
+                <div *ngIf="formHospede.controls['nome'].hasError('required') && (formHospede.controls['nome'].dirty)" class="invalid-message">
+                  Insira um documento.
+                </div>
               </div>
               <div class="col-lg-4">
-                <input type="text" formControlName="telefone" [formControl]="formHospede.controls['telefone']" 
+                <input type="text" [ngClass]="formHospede.controls['telefone'].hasError('required') && (formHospede.controls['telefone'].dirty) ? 
+                'invalid-field' : !formHospede.controls['telefone'].hasError('required') && (formHospede.controls['telefone'].dirty) ? 
+                'valid-field' : ''" formControlName="telefone" [formControl]="formHospede.controls['telefone']" 
                 class="form-control form-control-sm" placeholder="Telefone">
+                <div *ngIf="formHospede.controls['nome'].hasError('required') && (formHospede.controls['nome'].dirty)" class="invalid-message">
+                  Insira um telefone.
+                </div>
               </div>
             </div>
           </div>
